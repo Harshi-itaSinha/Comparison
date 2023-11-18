@@ -1,0 +1,100 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Price Comparison</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Your Bootstrap-styled HTML form for input parameters here -->
+        <form id="comparisonForm">
+            <div class="form-group">
+                <label for="searchTerm">Search Term:</label>
+                <input type="text" class="form-control" id="searchTerm" name="searchTerm" maxlength="20" required>
+            </div>
+
+            <div class="form-group">
+                <label for="filterOption">Filter:</label>
+                <select class="form-control" id="filterOption" name="filterOption">
+                    <option value="none">None</option>
+                    <option value="highest_price">Highest Price</option>
+                    <option value="lowest_price">Lowest Price</option>
+                    <option value="highest_rating">Highest Rating</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="topN">Top n:</label>
+                <input type="number" class="form-control" id="topN" name="topN" value="3" min="1">
+            </div>
+
+            <div class="form-group">
+                <label>Comparison Websites:</label>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="website1" name="comparisonWebsite" value="website1" checked>
+                    <label class="form-check-label" for="website1">Website 1</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="website2" name="comparisonWebsite" value="website2" checked>
+                    <label class="form-check-label" for="website2">Website 2</label>
+                </div>
+                <!-- Add more websites as needed -->
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="comparePrices()">Compare Prices</button>
+        </form>
+
+        <!-- Display the results here -->
+        <div id="results" class="mt-4">
+            {% if products %}
+                <h2>Comparison Results:</h2>
+                <ul class="list-group">
+                    {% for product in products %}
+                        <li class="list-group-item">
+                            <strong>Title:</strong> {{ product.title }}<br>
+                            <strong>URL:</strong> <a href="{{ product.url }}" target="_blank">{{ product.url }}</a><br>
+                            <strong>Total Review Count:</strong> {{ product.total_review_count }}<br>
+                            <strong>Rating:</strong> {{ product.rating }}<br>
+                            <strong>Price:</strong> {{ product.price }}<br>
+                            <strong>Website:</strong> <a href="{{ product.website }}" target="_blank">{{ product.website }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p class="mt-2">Total Products Considered: {{ total_products_considered }}</p>
+            {% else %}
+                <p class="mt-2">No products found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies (optional, but required for certain features) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Your JavaScript code for handling user input and making API requests
+        function comparePrices() {
+            // Get input values (search term, filter, top n, comparison websites)
+            const formData = new FormData(document.getElementById('comparisonForm'));
+
+            // Make an API request using fetch or another AJAX library
+            fetch('/api/compare_prices', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the results in the 'results' div
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
