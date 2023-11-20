@@ -46,7 +46,7 @@ def compare_prices(search_term, filter_type, top_n, comparison_websites):
 
     # Calculate total products considered
     total_products_considered = len(result)
- 
+
     print(result)
 
     # Construct the final API output
