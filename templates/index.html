@@ -7,8 +7,118 @@
     <title>Product Price Comparison</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </head>
 <body>
+
+    <script type="text/javascript">
+        console.log('Script loaded');
+
+        // Your JavaScript code for handling user input and making API requests
+        function comparePrices() {
+            // Get input values (search term, filter, top n, comparison websites)
+            console.log('in the function');
+            const formData = new FormData(document.getElementById('comparisonForm'));
+            const searchTerm = document.getElementById("searchTerm").value;
+            const filter = formData.get("filterOption");
+            const topN = document.getElementById("topN").value;
+            //const websites = Array.from(document.getElementById("websites").selectedOptions).map(option => option.value);
+            console.log('Checkbox elements:', document.getElementsByName("comparisonWebsite"));
+const       websites = Array.from(document.getElementsByName("comparisonWebsite"))
+                     .filter(option => option.checked)
+                     .map(option => option.value);
+
+            console.log('Selected websites:', websites);
+            const data = {
+                searchTerm: searchTerm,
+                filter: filter,
+                topN: topN,
+                websites: websites
+            };
+
+
+            // Make an API request using fetch
+            fetch('/api/compare_prices', {
+
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Handle the API response
+                console.log(result);
+                updateUI(result);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Handle errors
+            });
+        }
+
+        function updateUI(result) {
+        // Assuming you have an element with the ID 'results' to display the results
+        var resultsContainer = document.getElementById('results');
+
+        // Clear existing content in the container
+        resultsContainer.innerHTML = '';
+
+        if (result.products.length > 0) {
+            // Create a heading for the results
+            var heading = document.createElement('h2');
+            heading.textContent = 'Comparison Results:';
+            resultsContainer.appendChild(heading);
+
+            // Create a list to display the products
+            var productList = document.createElement('ul');
+            productList.className = 'list-group';
+
+            // Loop through the products and create list items
+            result.products.forEach(product => {
+                var listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+
+                // Set the inner HTML content
+                listItem.innerHTML = `
+                    <strong>Title:</strong> ${product.title}<br>
+                    <strong>URL:</strong> <a href="${product.url}" target="_blank">${product.url}</a><br>
+
+                    <strong>Rating:</strong> ${product.rating}<br>
+                    <strong>Price:</strong> ${product.price}<br>
+                    <strong>Website:</strong> <a href="${product.website}" target="_blank">${product.website}</a>
+                `;
+
+                // Append the list item to the product list
+                productList.appendChild(listItem);
+            });
+
+            // Append the product list to the results container
+            resultsContainer.appendChild(productList);
+
+            // Display the total number of products considered
+            var totalProductsConsidered = document.createElement('p');
+            totalProductsConsidered.className = 'mt-2';
+            totalProductsConsidered.textContent = `Total Products Considered: ${result.total_products_considered}`;
+            resultsContainer.appendChild(totalProductsConsidered);
+        } else {
+            // If no products are found, display a message
+            var noProductsMessage = document.createElement('p');
+            noProductsMessage.className = 'mt-2';
+            noProductsMessage.textContent = 'No products found.';
+            resultsContainer.appendChild(noProductsMessage);
+        }
+      }
+
+
+    </script>
+
+
+
     <div class="container mt-4">
         <!-- Your Bootstrap-styled HTML form for input parameters here -->
         <form id="comparisonForm">
@@ -24,6 +134,8 @@
                     <option value="highest_price">Highest Price</option>
                     <option value="lowest_price">Lowest Price</option>
                     <option value="highest_rating">Highest Rating</option>
+                    <option value="highest_rating">relevance</option>
+                    relevance
                 </select>
             </div>
 
@@ -35,12 +147,24 @@
             <div class="form-group">
                 <label>Comparison Websites:</label>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="website1" name="comparisonWebsite" value="website1" checked>
-                    <label class="form-check-label" for="website1">Website 1</label>
+                    <input type="checkbox" class="form-check-input" id="website1" name="comparisonWebsite" value="Amazon" checked>
+                    <label class="form-check-label" for="website1">Amazon</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="website2" name="comparisonWebsite" value="website2" checked>
-                    <label class="form-check-label" for="website2">Website 2</label>
+                    <input type="checkbox" class="form-check-input" id="website2" name="comparisonWebsite" value="Flipkart" checked>
+                    <label class="form-check-label" for="website2">Flipkart</label>
+                </div>
+                 <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="website3" name="comparisonWebsite" value="SnapDeal" checked>
+                    <label class="form-check-label" for="website3">SnapDeal</label>
+                </div>
+                 <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="website4" name="comparisonWebsite" value="Meesho" checked>
+                    <label class="form-check-label" for="website4">Meesho</label>
+                </div>
+                 <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="website5" name="comparisonWebsite" value="Shopify" checked>
+                    <label class="form-check-label" for="website5">Shopify</label>
                 </div>
                 <!-- Add more websites as needed -->
             </div>
@@ -72,29 +196,6 @@
     </div>
 
     <!-- Bootstrap JS and dependencies (optional, but required for certain features) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script>
-        // Your JavaScript code for handling user input and making API requests
-        function comparePrices() {
-            // Get input values (search term, filter, top n, comparison websites)
-            const formData = new FormData(document.getElementById('comparisonForm'));
-
-            // Make an API request using fetch or another AJAX library
-            fetch('/api/compare_prices', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Display the results in the 'results' div
-                const resultsDiv = document.getElementById('results');
-                resultsDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    </script>
 </body>
 </html>
